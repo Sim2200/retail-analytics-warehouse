@@ -1,0 +1,38 @@
+{
+  "producer": {
+    "events_sent": 330014,
+    "seconds": 17.74,
+    "events_per_second": 18605.9,
+    "target_rate": 0.0,
+    "started_at": "2026-09-26T21:02:19.984Z",
+    "finished_at": "2026-09-26T21:03:52.931Z"
+  },
+  "flink_records_in_per_second": {
+    "peak": 5500.9,
+    "mean": 4125.6,
+    "samples": 16
+  },
+  "windows": 1,
+  "orders_in_windows": 220222,
+  "latency_ms": {
+    "min": 7062,
+    "median": 7062,
+    "max": 7062
+  },
+  "flink_emit_ms": {
+    "min": 7044,
+    "median": 7044,
+    "max": 7044
+  },
+  "windows_detail": [
+    {
+      "window_start": "2026-09-26T21:02:00",
+      "window_end": "2026-09-26T21:03:00",
+      "orders": 220222,
+      "revenue": 8031089.63,
+      "avg_basket": 3.599,
+      "flink_ms": 7044,
+      "latency_ms": 7062
+    }
+  ]
+}

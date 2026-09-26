@@ -1,0 +1,21 @@
+{
+  "metric": "Source__orders[1].numRecordsOutPerSecond summed over 2 subtasks",
+  "samples": [
+    1213.2,
+    1546.5,
+    1546.5,
+    1880.0,
+    1880.0,
+    2000.5,
+    2000.5,
+    1999.4,
+    1999.4,
+    2000.0,
+    2000.0,
+    2000.4,
+    2000.4,
+    1997.1
+  ],
+  "mean_nonzero": 1861.7,
+  "peak": 2000.5
+}

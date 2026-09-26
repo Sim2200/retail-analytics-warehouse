@@ -7,8 +7,9 @@ realistic e-commerce shape instead:
 
   customers     50,000 rows, with PII (name, email, phone, street address)
   products       5,000 rows, in 21 departments / 134 aisles, with unit prices
-  orders        420,000 rows, one year of timestamps with weekly/daily seasonality
-  order_items  ~1.5M rows, one row per product in an order
+  orders       ~330,000 rows (420,000 drawn, weekdays thinned to 70%), one year of
+               timestamps with weekly/daily seasonality
+  order_items  ~1.19M rows, one row per product in an order
   customer_updates  a later batch of customer changes (moves, segment upgrades),
                     used to demonstrate SCD Type 2 history in dim_customer
 

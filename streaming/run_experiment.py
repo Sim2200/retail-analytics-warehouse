@@ -39,22 +39,27 @@ def flink_jobs() -> list[dict]:
 
 
 def sample_flink_rate(job_id: str | None, samples: list[float], stop: threading.Event) -> None:
-    """Every 5 s, read numRecordsInPerSecond of the job's source vertex from the Flink REST API."""
+    """Every 5 s, read the Kafka source operator's numRecordsOutPerSecond (summed over its
+    subtasks) from the Flink REST API. The task-level counters are useless here: the source
+    task has no input, and its output is the pre-aggregated window state, not the events."""
     if not job_id:
         return
     try:
         with urllib.request.urlopen(f"http://localhost:8081/jobs/{job_id}", timeout=10) as r:
-            vertices = _json.load(r)["vertices"]
-        source = next(v["id"] for v in vertices if "Source" in v["name"] or "source" in v["name"].lower())
+            job = _json.load(r)
+        vertex = next(v for v in job["vertices"] if v["name"].startswith("Source"))
+        names = [f"{i}.Source__orders[1].numRecordsOutPerSecond" for i in range(vertex["parallelism"])]
     except Exception:  # noqa: BLE001
         return
-    url = f"http://localhost:8081/jobs/{job_id}/vertices/{source}/metrics?get=0.numRecordsInPerSecond"
+    url = (f"http://localhost:8081/jobs/{job_id}/vertices/{vertex['id']}/metrics?get="
+           + ",".join(n.replace("[", "%5B").replace("]", "%5D") for n in names))
     while not stop.is_set():
         try:
             with urllib.request.urlopen(url, timeout=10) as r:
                 data = _json.load(r)
-            if data and data[0].get("value") not in (None, ""):
-                samples.append(float(data[0]["value"]))
+            total = sum(float(m["value"]) for m in data if m.get("value") not in (None, ""))
+            if total > 0:
+                samples.append(total)
         except Exception:  # noqa: BLE001
             pass
         stop.wait(5)
@@ -64,6 +69,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rate", type=float, default=2000)
     ap.add_argument("--seconds", type=float, default=180)
+    ap.add_argument("--tail", type=float, default=75, help="trailer seconds so the last window closes (see producer.py)")
+    ap.add_argument("--out", default="results/streaming_run.json")
     a = ap.parse_args()
 
     print("== export replay set")
@@ -95,7 +102,7 @@ def main() -> None:
     sampler.start()
 
     print(f"== producer: {a.rate:g} events/s for {a.seconds:g}s")
-    sh(DBT_PY, "streaming/producer.py", "--rate", str(a.rate), "--seconds", str(a.seconds))
+    sh(DBT_PY, "streaming/producer.py", "--rate", str(a.rate), "--seconds", str(a.seconds), "--tail-seconds", str(a.tail))
     stop.set()
 
     print("== waiting for the last windows to close and load")
@@ -108,10 +115,10 @@ def main() -> None:
     streaming = json.loads(Path("results/streaming.json").read_text())
     merged = {"producer": producer,
               "flink_records_in_per_second": {"peak": round(max(samples), 1) if samples else None,
-                                              "mean_while_producing": round(sum(samples) / len(samples), 1) if samples else None,
+                                              "mean": round(sum(samples) / len(samples), 1) if samples else None,
                                               "samples": len(samples)},
               **streaming}
-    Path("results/streaming_run.json").write_text(json.dumps(merged, indent=2))
+    Path(a.out).write_text(json.dumps(merged, indent=2))
     print("== result")
     print(json.dumps({k: v for k, v in merged.items() if k != "windows_detail"}, indent=2))
 

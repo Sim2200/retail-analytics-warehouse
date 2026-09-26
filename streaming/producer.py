@@ -40,6 +40,9 @@ def main() -> None:
     ap.add_argument("--rate", type=float, default=2000, help="target events/second; 0 = unthrottled")
     ap.add_argument("--seconds", type=float, default=180, help="stop after this long")
     ap.add_argument("--limit", type=int, default=0, help="max events (0 = all orders)")
+    ap.add_argument("--tail-seconds", type=float, default=0,
+                    help="after the replay, keep sending 1 event/s for this long so the watermark advances "
+                         "and the last full window closes (event-time windows never close on a silent stream)")
     a = ap.parse_args()
 
     table = pq.read_table(a.replay, columns=["order_id", "customer_id", "order_total", "item_count", "status"])
@@ -73,6 +76,17 @@ def main() -> None:
             print(f"  {sent:,} events, {sent / (time.time() - start):,.0f}/s", flush=True)
     producer.flush()
     elapsed = time.time() - start
+    if a.tail_seconds > 0:
+        tail_end = time.time() + a.tail_seconds
+        i = 0
+        while time.time() < tail_end:
+            stamp = iso(time.time())
+            producer.send("orders", key=f"tail-{i}", value={
+                "order_id": -1 - i, "customer_id": 0, "order_total": 0.0, "item_count": 0,
+                "status": "tail", "event_time": stamp, "produced_at": stamp})
+            i += 1
+            time.sleep(1)
+        producer.flush()
     result = {"events_sent": sent, "seconds": round(elapsed, 2), "events_per_second": round(sent / elapsed, 1),
               "target_rate": a.rate, "started_at": iso(start), "finished_at": iso(time.time())}
     Path("results").mkdir(exist_ok=True)

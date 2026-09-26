@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stream_daily_metrics
+    description: Flink window aggregates rolled up per day and joined to dim_date. Empty until `make stream` has run.
+    columns:
+      - {name: date_day, tests: [unique, not_null]}
+      - {name: day_name}
+      - {name: windows}
+      - {name: orders}
+      - {name: revenue}
+      - {name: avg_basket_size}
+      - {name: avg_latency_ms, description: "Average of (loaded into DuckDB) minus (window end), per window"}
+      - {name: max_latency_ms}

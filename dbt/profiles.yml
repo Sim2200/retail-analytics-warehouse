@@ -1,0 +1,21 @@
+# Two targets. `duckdb` (default) is a local file and needs nothing else.
+# `bigquery` is optional: create a free sandbox project at console.cloud.google.com,
+# run `gcloud auth application-default login`, then
+#   pip install dbt-bigquery && dbt build --target bigquery --vars '{bq_project: your-project-id}'
+retail_warehouse:
+  target: duckdb
+  outputs:
+    duckdb:
+      type: duckdb
+      path: "{{ env_var('WAREHOUSE_PATH', '../warehouse.duckdb') }}"
+      schema: main
+      threads: 4
+    bigquery:
+      type: bigquery
+      method: oauth
+      project: "{{ var('bq_project', 'your-gcp-project-id') }}"
+      dataset: retail_warehouse
+      location: US
+      threads: 4
+      # Sandbox projects cannot run DML on streaming buffers or use some DDL; the
+      # marts still build. Column-level security: see README, Governance section.

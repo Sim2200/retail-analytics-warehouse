@@ -1,0 +1,43 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Files landed by scripts/load_raw.py. Each table carries `_loaded_at`.
+    schema: raw
+    loaded_at_field: _loaded_at
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 72, period: hour}
+    tables:
+      - name: customers
+        description: Customer master as of the initial load. Contains PII.
+        columns:
+          - name: customer_id
+            tests: [unique, not_null]
+      - name: customer_updates
+        description: A later batch of customer changes (moves, segment changes). Same shape as customers.
+      - name: products
+        description: Product catalog with list prices.
+        columns:
+          - name: product_id
+            tests: [unique, not_null]
+      - name: orders
+        description: Order headers, one row per order.
+        columns:
+          - name: order_id
+            tests: [unique, not_null]
+      - name: order_items
+        description: One row per product line in an order.
+        columns:
+          - name: order_item_id
+            tests: [unique, not_null]
+
+  - name: stream
+    description: Windowed aggregates written by the Flink job via streaming/loader.py.
+    schema: stream
+    loaded_at_field: loaded_at
+    freshness:
+      warn_after: {count: 1, period: day}
+    tables:
+      - name: window_metrics
+        description: One row per one-minute window; orders, revenue and basket size, plus emit/load timestamps for latency measurement.

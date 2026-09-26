@@ -1,0 +1,12 @@
+dbt-core>=1.9,<2
+dbt-duckdb>=1.9
+duckdb>=1.1
+pyarrow
+pandas
+numpy
+faker
+sqlfluff
+sqlfluff-templater-dbt
+kafka-python-ng
+networkx
+matplotlib

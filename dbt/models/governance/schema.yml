@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: dim_customer_restricted
+    description: Analyst view of dim_customer with PII masked. Analysts query the `analyst` schema only.
+    meta: {access: analyst, contains_pii: false}
+    columns:
+      - {name: customer_sk, tests: [unique, not_null]}
+      - {name: customer_id}
+      - {name: email_hash, description: "md5 of the email; lets analysts count distinct people"}
+      - {name: email_masked, description: "first letter + *** + domain"}
+      - {name: phone_masked, description: "country and area code only"}
+      - {name: city}
+      - {name: state}
+      - {name: segment}
+      - {name: signup_date}
+      - {name: valid_from}
+      - {name: valid_to}
+      - {name: is_current}
+
+  - name: pii_inventory
+    description: Every column tagged meta.pii in the project, generated from the dbt graph at build time.
+    columns:
+      - {name: schema_name}
+      - {name: model_name}
+      - {name: column_name}

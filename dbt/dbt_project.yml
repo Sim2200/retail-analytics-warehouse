@@ -1,0 +1,43 @@
+name: retail_warehouse
+version: "1.0.0"
+config-version: 2
+profile: retail_warehouse
+
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # The Makefile runs the snapshot twice: first without the update batch (the
+  # initial customer state), then with it, which creates the SCD2 history rows.
+  include_customer_updates: true
+  # dim_date range
+  date_start: "2024-01-01"
+  date_end: "2026-12-31"
+
+models:
+  retail_warehouse:
+    +materialized: view
+    staging:
+      +schema: staging
+    intermediate:
+      +schema: intermediate
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: table
+      +contract:
+        enforced: true
+    governance:
+      +schema: analyst
+      +materialized: view
+    streaming:
+      +schema: marts
+      +materialized: view
+
+snapshots:
+  retail_warehouse:
+    +target_schema: snapshots

@@ -1,0 +1,53 @@
+# On every push and pull request: generate a small sample of the dataset, build the
+# warehouse with dbt (every model, snapshot and test must pass) and lint the SQL.
+# The streaming side needs Docker and a real run, so it is not part of CI.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dbt-build:
+    name: dbt build (DuckDB) + sqlfluff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Generate a 5% sample and load it
+        run: |
+          python data_gen/generate.py --scale 0.05
+          python scripts/load_raw.py
+      - name: Snapshot the initial customer state
+        working-directory: dbt
+        env: {DBT_PROFILES_DIR: .}
+        run: |
+          dbt deps || true
+          dbt run --select stg_customers --vars '{include_customer_updates: false}'
+          dbt snapshot --vars '{include_customer_updates: false}'
+      - name: dbt build (run + test, with the update batch)
+        working-directory: dbt
+        env: {DBT_PROFILES_DIR: .}
+        run: dbt build --full-refresh
+      - name: Data-quality summary
+        run: python scripts/dq_summary.py
+      - name: sqlfluff lint
+        run: sqlfluff lint dbt/models dbt/snapshots
+      - name: Upload dbt artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-target
+          path: |
+            dbt/target/run_results.json
+            dbt/target/manifest.json
+            results/last_build.json

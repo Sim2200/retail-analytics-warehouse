@@ -1,0 +1,12 @@
+.venv/
+.venv-flink/
+__pycache__/
+*.pyc
+data/raw/
+*.duckdb
+*.duckdb.wal
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+logs/
+.DS_Store

@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: int_order_totals
+    description: One row per order with totals summed from its lines.
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: item_count
+      - name: unit_count
+      - name: gross_amount
+      - name: discount_amount
+      - name: order_total
+        tests: [not_null]

@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: One row per customer, latest known state (initial load plus the update batch). PII columns are tagged in meta.
+    columns:
+      - name: customer_id
+        description: Natural key.
+        tests: [unique, not_null]
+      - name: first_name
+        meta: {pii: true}
+      - name: last_name
+        meta: {pii: true}
+      - name: email
+        description: Lower-cased.
+        meta: {pii: true}
+        tests: [not_null]
+      - name: phone
+        meta: {pii: true}
+      - name: street_address
+        meta: {pii: true}
+      - name: city
+      - name: state
+      - name: segment
+        tests:
+          - accepted_values: {values: [new, regular, loyal, vip]}
+      - name: signup_date
+      - name: updated_at
+        description: When this version of the row was last changed; drives the SCD2 snapshot.
+        tests: [not_null]
+
+  - name: stg_products
+    description: Product catalog with typed list prices.
+    columns:
+      - name: product_id
+        tests: [unique, not_null]
+      - name: product_name
+        tests: [not_null]
+      - name: department
+        tests: [not_null]
+      - name: aisle_id
+      - name: list_price
+        tests: [not_null]
+      - name: is_active
+
+  - name: stg_orders
+    description: Order headers with typed timestamps.
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships: {to: "ref('stg_customers')", field: customer_id}
+      - name: ordered_at
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values: {values: [completed, cancelled, returned]}
+      - name: channel
+        tests:
+          - accepted_values: {values: [web, ios, android]}
+      - name: promo_code
+
+  - name: stg_order_items
+    description: One row per order line, with the line total computed once here.
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+      - name: order_id
+        tests:
+          - not_null
+          - relationships: {to: "ref('stg_orders')", field: order_id}
+      - name: line_number
+      - name: product_id
+        tests:
+          - not_null
+          - relationships: {to: "ref('stg_products')", field: product_id}
+      - name: quantity
+        tests: [not_null]
+      - name: unit_price
+      - name: discount
+      - name: line_total

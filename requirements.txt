@@ -10,3 +10,4 @@ sqlfluff-templater-dbt
 kafka-python-ng
 networkx
 matplotlib
+lz4

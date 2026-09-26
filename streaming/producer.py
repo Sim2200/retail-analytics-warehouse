@@ -8,6 +8,10 @@ Events are sent in original order at a target rate (or as fast as possible with
                even if event_time is later replaced by the original ordered_at
   ordered_at   the original timestamp from the dataset, for reference
 
+The replay set is a Parquet file exported from the warehouse beforehand
+(streaming/export_replay.py), so the producer never opens warehouse.duckdb while
+the loader holds its write lock.
+
 Writes results/producer.json with events sent, wall time and events/second.
 
     python streaming/producer.py --rate 2000 --seconds 180
@@ -21,7 +25,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import duckdb
+import pyarrow.parquet as pq
 from kafka import KafkaProducer
 
 
@@ -32,18 +36,16 @@ def iso(ts: float) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--bootstrap", default="localhost:9092")
-    ap.add_argument("--db", default="warehouse.duckdb")
+    ap.add_argument("--replay", default="data/replay_orders.parquet")
     ap.add_argument("--rate", type=float, default=2000, help="target events/second; 0 = unthrottled")
     ap.add_argument("--seconds", type=float, default=180, help="stop after this long")
     ap.add_argument("--limit", type=int, default=0, help="max events (0 = all orders)")
     a = ap.parse_args()
 
-    con = duckdb.connect(a.db, read_only=True)
-    q = "SELECT order_id, customer_id, order_total, item_count, status FROM marts.fact_orders ORDER BY ordered_at"
+    table = pq.read_table(a.replay, columns=["order_id", "customer_id", "order_total", "item_count", "status"])
     if a.limit:
-        q += f" LIMIT {a.limit}"
-    rows = con.execute(q).fetchall()
-    con.close()
+        table = table.slice(0, a.limit)
+    rows = zip(*(table.column(c).to_pylist() for c in ("order_id", "customer_id", "order_total", "item_count", "status")))
 
     producer = KafkaProducer(
         bootstrap_servers=a.bootstrap, acks=1, linger_ms=20, batch_size=64 * 1024,

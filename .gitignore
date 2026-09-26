@@ -10,3 +10,4 @@ dbt/dbt_packages/
 dbt/logs/
 logs/
 .DS_Store
+data/replay_orders.parquet

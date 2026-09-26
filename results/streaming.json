@@ -1,0 +1,25 @@
+{
+  "windows": 1,
+  "orders_in_windows": 10202,
+  "latency_ms": {
+    "min": 2321,
+    "median": 2321,
+    "max": 2321
+  },
+  "flink_emit_ms": {
+    "min": 2263,
+    "median": 2263,
+    "max": 2263
+  },
+  "windows_detail": [
+    {
+      "window_start": "2026-09-26T20:38:00",
+      "window_end": "2026-09-26T20:39:00",
+      "orders": 10202,
+      "revenue": 372495.74,
+      "avg_basket": 3.6,
+      "flink_ms": 2263,
+      "latency_ms": 2321
+    }
+  ]
+}

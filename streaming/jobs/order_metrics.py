@@ -10,7 +10,9 @@ tumbling one-minute window to topic `order_metrics`:
 streaming/loader.py compares it (and its own load time) with window_end to
 measure latency.
 
-Submitted with:  flink run -py /opt/flink/jobs/order_metrics.py -d
+Submitted with:  flink run -d -py /opt/flink/jobs/order_metrics.py
+(the INSERT is submitted asynchronously; the script must not wait on it, or the
+client blocks for the lifetime of the streaming job)
 """
 
 from pyflink.table import EnvironmentSettings, TableEnvironment
@@ -75,4 +77,4 @@ t_env.execute_sql("""
     )
     WHERE status = 'completed'
     GROUP BY window_start, window_end
-""").wait()
+""")

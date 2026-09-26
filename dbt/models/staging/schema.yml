@@ -23,7 +23,7 @@ models:
       - name: state
       - name: segment
         tests:
-          - accepted_values: {values: [new, regular, loyal, vip]}
+          - accepted_values: {arguments: {values: [new, regular, loyal, vip]}}
       - name: signup_date
       - name: updated_at
         description: When this version of the row was last changed; drives the SCD2 snapshot.
@@ -51,15 +51,15 @@ models:
       - name: customer_id
         tests:
           - not_null
-          - relationships: {to: "ref('stg_customers')", field: customer_id}
+          - relationships: {arguments: {to: "ref('stg_customers')", field: customer_id}}
       - name: ordered_at
         tests: [not_null]
       - name: status
         tests:
-          - accepted_values: {values: [completed, cancelled, returned]}
+          - accepted_values: {arguments: {values: [completed, cancelled, returned]}}
       - name: channel
         tests:
-          - accepted_values: {values: [web, ios, android]}
+          - accepted_values: {arguments: {values: [web, ios, android]}}
       - name: promo_code
 
   - name: stg_order_items
@@ -70,12 +70,12 @@ models:
       - name: order_id
         tests:
           - not_null
-          - relationships: {to: "ref('stg_orders')", field: order_id}
+          - relationships: {arguments: {to: "ref('stg_orders')", field: order_id}}
       - name: line_number
       - name: product_id
         tests:
           - not_null
-          - relationships: {to: "ref('stg_products')", field: product_id}
+          - relationships: {arguments: {to: "ref('stg_products')", field: product_id}}
       - name: quantity
         tests: [not_null]
       - name: unit_price

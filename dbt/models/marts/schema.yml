@@ -47,7 +47,7 @@ models:
       - {name: street_address, data_type: varchar, meta: {pii: true}}
       - {name: city, data_type: varchar}
       - {name: state, data_type: varchar}
-      - {name: segment, data_type: varchar, tests: [{accepted_values: {values: [new, regular, loyal, vip]}}]}
+      - {name: segment, data_type: varchar, tests: [{accepted_values: {arguments: {values: [new, regular, loyal, vip]}}}]}
       - {name: signup_date, data_type: date}
       - {name: valid_from, data_type: timestamp, tests: [not_null]}
       - {name: valid_to, data_type: timestamp, description: "Null for the current version"}
@@ -58,11 +58,11 @@ models:
     config: {contract: {enforced: true}}
     columns:
       - {name: order_id, data_type: bigint, tests: [unique, not_null]}
-      - {name: customer_sk, data_type: varchar, tests: [not_null, {relationships: {to: "ref('dim_customer')", field: customer_sk}}]}
+      - {name: customer_sk, data_type: varchar, tests: [not_null, {relationships: {arguments: {to: "ref('dim_customer')", field: customer_sk}}}]}
       - {name: customer_id, data_type: bigint, tests: [not_null]}
-      - {name: date_key, data_type: integer, tests: [not_null, {relationships: {to: "ref('dim_date')", field: date_key}}]}
+      - {name: date_key, data_type: integer, tests: [not_null, {relationships: {arguments: {to: "ref('dim_date')", field: date_key}}}]}
       - {name: ordered_at, data_type: timestamp, tests: [not_null]}
-      - {name: status, data_type: varchar, tests: [{accepted_values: {values: [completed, cancelled, returned]}}]}
+      - {name: status, data_type: varchar, tests: [{accepted_values: {arguments: {values: [completed, cancelled, returned]}}}]}
       - {name: channel, data_type: varchar}
       - {name: promo_code, data_type: varchar}
       - {name: item_count, data_type: integer}
@@ -76,12 +76,12 @@ models:
     config: {contract: {enforced: true}}
     columns:
       - {name: order_item_id, data_type: bigint, tests: [unique, not_null]}
-      - {name: order_id, data_type: bigint, tests: [not_null, {relationships: {to: "ref('fact_orders')", field: order_id}}]}
+      - {name: order_id, data_type: bigint, tests: [not_null, {relationships: {arguments: {to: "ref('fact_orders')", field: order_id}}}]}
       - {name: line_number, data_type: integer}
-      - {name: customer_sk, data_type: varchar, tests: [not_null, {relationships: {to: "ref('dim_customer')", field: customer_sk}}]}
-      - {name: product_sk, data_type: varchar, tests: [not_null, {relationships: {to: "ref('dim_product')", field: product_sk}}]}
+      - {name: customer_sk, data_type: varchar, tests: [not_null, {relationships: {arguments: {to: "ref('dim_customer')", field: customer_sk}}}]}
+      - {name: product_sk, data_type: varchar, tests: [not_null, {relationships: {arguments: {to: "ref('dim_product')", field: product_sk}}}]}
       - {name: product_id, data_type: bigint}
-      - {name: date_key, data_type: integer, tests: [not_null, {relationships: {to: "ref('dim_date')", field: date_key}}]}
+      - {name: date_key, data_type: integer, tests: [not_null, {relationships: {arguments: {to: "ref('dim_date')", field: date_key}}}]}
       - {name: ordered_at, data_type: timestamp, tests: [not_null]}
       - {name: quantity, data_type: integer, tests: [not_null]}
       - {name: unit_price, data_type: "decimal(10,2)"}

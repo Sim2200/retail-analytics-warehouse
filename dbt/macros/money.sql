@@ -1,3 +1,3 @@
 {% macro money(expression) -%}
-    cast(round({{ expression }}, 2) as numeric(12, 2))
+    cast(round({{ expression }}, 2) as numeric)
 {%- endmacro %}

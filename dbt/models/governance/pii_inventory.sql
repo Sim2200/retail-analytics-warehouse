@@ -1,6 +1,7 @@
 {#- Generated from the dbt graph at compile time: every column tagged
     meta.pii: true across all models, so the inventory can never drift
-    from the YAML. -#}
+    from the YAML. Written as a UNION ALL of literals because BigQuery has
+    no VALUES clause in FROM. -#}
 {%- set rows = [] -%}
 {%- if execute -%}
     {%- for node in graph.nodes.values() if node.resource_type == 'model' -%}
@@ -10,9 +11,12 @@
     {%- endfor -%}
 {%- endif -%}
 
-select * from (
-    values
-    {%- for r in rows %}
-        ('{{ r[0] }}', '{{ r[1] }}', '{{ r[2] }}'){{ "," if not loop.last }}
-    {%- endfor %}
-)
+{%- for r in rows %}
+select
+    '{{ r[0] }}' as schema_name,
+    '{{ r[1] }}' as model_name,
+    '{{ r[2] }}' as column_name
+{%- if not loop.last %}
+union all
+{%- endif %}
+{%- endfor %}

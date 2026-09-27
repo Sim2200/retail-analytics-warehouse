@@ -59,6 +59,7 @@ bq-build:           ## the same two-pass snapshot + dbt build, on BigQuery; writ
 	$(DBT_BQ) snapshot --target bigquery --vars '{include_customer_updates: false}'
 	$(DBT_BQ) build --target bigquery --full-refresh
 	$(PY) scripts/bq_build_summary.py --project $(BQ_PROJECT)
+	$(PY) scripts/bq_authorized_view.py --project $(BQ_PROJECT)
 
 all: build docs     ## batch side end to end (run `make stream-up stream` for the streaming side)
 

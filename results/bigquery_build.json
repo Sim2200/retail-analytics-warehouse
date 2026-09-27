@@ -1,0 +1,18 @@
+{
+  "project": "project-1adf2361-a5bc-4d4a-a7f",
+  "location": "US",
+  "invocation_id": "18d31de1-6002-488a-a85d-c15ad0c35e8e",
+  "models_built": 14,
+  "models_failed": 0,
+  "tests_run": 84,
+  "tests_passed": 84,
+  "tests_failed": 0,
+  "build_seconds": 31.0,
+  "bigquery_jobs": 111,
+  "bytes_processed": 721180998,
+  "bytes_billed": 1387266048,
+  "gib_billed": 1.292,
+  "slot_seconds": 82.3,
+  "on_demand_cost_usd": 0.0079,
+  "note": "cost at the on-demand list price; the first 1 TiB per month is free"
+}

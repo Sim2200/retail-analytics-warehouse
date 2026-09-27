@@ -1,8 +1,8 @@
 {
   "events_sent": 330001,
-  "seconds": 165.09,
-  "events_per_second": 1998.9,
+  "seconds": 165.16,
+  "events_per_second": 1998.0,
   "target_rate": 2000.0,
-  "started_at": "2026-09-27T14:18:11.642Z",
-  "finished_at": "2026-09-27T14:22:57.215Z"
+  "started_at": "2026-09-27T14:30:09.212Z",
+  "finished_at": "2026-09-27T14:34:54.763Z"
 }

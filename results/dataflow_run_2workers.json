@@ -1,0 +1,94 @@
+{
+  "job": {
+    "name": "order-metrics-20260927-142512",
+    "id": "2026-09-27_07_25_20-17526867263164485356",
+    "region": "us-central1",
+    "machine_type": "e2-medium",
+    "workers": 2,
+    "max_workers": 2,
+    "seconds_to_running": 122,
+    "seconds_to_first_window": 167,
+    "wall_seconds": 593
+  },
+  "publisher": {
+    "events_sent": 330001,
+    "seconds": 165.16,
+    "events_per_second": 1998.0,
+    "target_rate": 2000.0,
+    "started_at": "2026-09-27T14:30:09.212Z",
+    "finished_at": "2026-09-27T14:34:54.763Z"
+  },
+  "windows": 4,
+  "orders_in_windows": 220297,
+  "latency_ms": {
+    "min": 34583,
+    "median": 67525.5,
+    "max": 81846
+  },
+  "beam_emit_ms": {
+    "min": 30838,
+    "median": 65020.0,
+    "max": 79870
+  },
+  "dataflow_metrics": {
+    "TotalVcpuTime": 1761,
+    "TotalMemoryUsage": 3608215,
+    "TotalPdUsage": 26427,
+    "TotalStreamingDataProcessed": 0.12340034171938896,
+    "TotalSeCuUsage": 0.054271353116031734,
+    "CurrentVcpuCount": 4
+  },
+  "cost_estimate_usd": {
+    "vcpu_hours": 0.489,
+    "memory_gb_hours": 0.979,
+    "streaming_data_gb": 0.0,
+    "total": 0.0372,
+    "note": "Dataflow list prices for us-central1; Pub/Sub and BigQuery streaming inserts are cents at this volume"
+  },
+  "windows_detail": [
+    {
+      "window_start": "2026-09-27T14:29:00+00:00",
+      "window_end": "2026-09-27T14:30:00+00:00",
+      "orders": 79,
+      "revenue": 2739.11,
+      "avg_basket": 3.683,
+      "emitted_at": "2026-09-27T14:31:19.870081+00:00",
+      "loaded_at": "2026-09-27T14:31:21.846282+00:00",
+      "beam_ms": 79870,
+      "latency_ms": 81846
+    },
+    {
+      "window_start": "2026-09-27T14:30:00+00:00",
+      "window_end": "2026-09-27T14:31:00+00:00",
+      "orders": 67888,
+      "revenue": 2471213.09,
+      "avg_basket": 3.592,
+      "emitted_at": "2026-09-27T14:32:09.169715+00:00",
+      "loaded_at": "2026-09-27T14:32:12.185847+00:00",
+      "beam_ms": 69169,
+      "latency_ms": 72185
+    },
+    {
+      "window_start": "2026-09-27T14:31:00+00:00",
+      "window_end": "2026-09-27T14:32:00+00:00",
+      "orders": 80209,
+      "revenue": 2931828.55,
+      "avg_basket": 3.605,
+      "emitted_at": "2026-09-27T14:33:00.871547+00:00",
+      "loaded_at": "2026-09-27T14:33:02.866526+00:00",
+      "beam_ms": 60871,
+      "latency_ms": 62866
+    },
+    {
+      "window_start": "2026-09-27T14:32:00+00:00",
+      "window_end": "2026-09-27T14:33:00+00:00",
+      "orders": 72121,
+      "revenue": 2627955.23,
+      "avg_basket": 3.6,
+      "emitted_at": "2026-09-27T14:33:30.838559+00:00",
+      "loaded_at": "2026-09-27T14:33:34.583187+00:00",
+      "beam_ms": 30838,
+      "latency_ms": 34583
+    }
+  ]
+}

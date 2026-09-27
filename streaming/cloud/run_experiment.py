@@ -158,7 +158,7 @@ def main() -> None:
     cost = vcpu_h * PRICE_VCPU_H + gb_h * PRICE_GB_H + shuffle_gb * PRICE_SHUFFLE_GB
 
     windows = sorted(seen.values(), key=lambda w: w["window_start"])
-    full = [w for w in windows if w["orders"] > 0]
+    full = [w for w in windows if w["orders"] > 0 and w["window_end"] > t0]   # skip warm-up windows
     if full:
         client.insert_rows_json(f"{P}.{FINAL_TABLE}", [{
             "window_start": w["window_start"].isoformat(), "window_end": w["window_end"].isoformat(),

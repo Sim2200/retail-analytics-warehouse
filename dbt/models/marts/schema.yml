@@ -5,29 +5,29 @@ models:
     description: Calendar dimension, one row per day from 2024-01-01 to 2026-12-31, generated in SQL.
     config: {contract: {enforced: true}}
     columns:
-      - {name: date_key, data_type: integer, description: "yyyymmdd integer key", tests: [unique, not_null]}
+      - {name: date_key, data_type: int64, description: "yyyymmdd integer key", tests: [unique, not_null]}
       - {name: date_day, data_type: date, tests: [unique, not_null]}
-      - {name: year, data_type: integer}
-      - {name: quarter, data_type: integer}
-      - {name: month, data_type: integer}
-      - {name: month_name, data_type: varchar}
-      - {name: week_of_year, data_type: integer}
-      - {name: day_of_month, data_type: integer}
-      - {name: day_of_week, data_type: integer, description: "ISO: 1 = Monday, 7 = Sunday"}
-      - {name: day_name, data_type: varchar}
-      - {name: is_weekend, data_type: boolean}
+      - {name: year, data_type: int64}
+      - {name: quarter, data_type: int64}
+      - {name: month, data_type: int64}
+      - {name: month_name, data_type: string}
+      - {name: week_of_year, data_type: int64}
+      - {name: day_of_month, data_type: int64}
+      - {name: day_of_week, data_type: int64, description: "ISO: 1 = Monday, 7 = Sunday"}
+      - {name: day_name, data_type: string}
+      - {name: is_weekend, data_type: bool}
 
   - name: dim_product
     description: Product dimension (Type 1; the catalog has no history).
     config: {contract: {enforced: true}}
     columns:
-      - {name: product_sk, data_type: varchar, description: "Surrogate key (md5 of product_id)", tests: [unique, not_null]}
-      - {name: product_id, data_type: bigint, tests: [unique, not_null]}
-      - {name: product_name, data_type: varchar, tests: [not_null]}
-      - {name: department, data_type: varchar, tests: [not_null]}
-      - {name: aisle_id, data_type: integer}
-      - {name: list_price, data_type: "decimal(10,2)", tests: [not_null]}
-      - {name: is_active, data_type: boolean}
+      - {name: product_sk, data_type: string, description: "Surrogate key (md5 of product_id)", tests: [unique, not_null]}
+      - {name: product_id, data_type: int64, tests: [unique, not_null]}
+      - {name: product_name, data_type: string, tests: [not_null]}
+      - {name: department, data_type: string, tests: [not_null]}
+      - {name: aisle_id, data_type: int64}
+      - {name: list_price, data_type: "numeric(10,2)", tests: [not_null]}
+      - {name: is_active, data_type: bool}
 
   - name: dim_customer
     description: >
@@ -38,52 +38,52 @@ models:
     config: {contract: {enforced: true}}
     meta: {access: engineer, contains_pii: true}
     columns:
-      - {name: customer_sk, data_type: varchar, description: "Surrogate key: md5(customer_id, valid_from)", tests: [unique, not_null]}
-      - {name: customer_id, data_type: bigint, description: "Natural key; repeats across versions", tests: [not_null]}
-      - {name: first_name, data_type: varchar, meta: {pii: true}}
-      - {name: last_name, data_type: varchar, meta: {pii: true}}
-      - {name: email, data_type: varchar, meta: {pii: true}, tests: [not_null]}
-      - {name: phone, data_type: varchar, meta: {pii: true}}
-      - {name: street_address, data_type: varchar, meta: {pii: true}}
-      - {name: city, data_type: varchar}
-      - {name: state, data_type: varchar}
-      - {name: segment, data_type: varchar, tests: [{accepted_values: {arguments: {values: [new, regular, loyal, vip]}}}]}
+      - {name: customer_sk, data_type: string, description: "Surrogate key: md5(customer_id, valid_from)", tests: [unique, not_null]}
+      - {name: customer_id, data_type: int64, description: "Natural key; repeats across versions", tests: [not_null]}
+      - {name: first_name, data_type: string, meta: {pii: true}}
+      - {name: last_name, data_type: string, meta: {pii: true}}
+      - {name: email, data_type: string, meta: {pii: true}, tests: [not_null]}
+      - {name: phone, data_type: string, meta: {pii: true}}
+      - {name: street_address, data_type: string, meta: {pii: true}}
+      - {name: city, data_type: string}
+      - {name: state, data_type: string}
+      - {name: segment, data_type: string, tests: [{accepted_values: {arguments: {values: [new, regular, loyal, vip]}}}]}
       - {name: signup_date, data_type: date}
       - {name: valid_from, data_type: timestamp, tests: [not_null]}
       - {name: valid_to, data_type: timestamp, description: "Null for the current version"}
-      - {name: is_current, data_type: boolean, tests: [not_null]}
+      - {name: is_current, data_type: bool, tests: [not_null]}
 
   - name: fact_orders
     description: One row per order with totals summed from its lines. Incremental on ordered_at.
     config: {contract: {enforced: true}}
     columns:
-      - {name: order_id, data_type: bigint, tests: [unique, not_null]}
-      - {name: customer_sk, data_type: varchar, tests: [not_null, {relationships: {arguments: {to: "ref('dim_customer')", field: customer_sk}}}]}
-      - {name: customer_id, data_type: bigint, tests: [not_null]}
-      - {name: date_key, data_type: integer, tests: [not_null, {relationships: {arguments: {to: "ref('dim_date')", field: date_key}}}]}
+      - {name: order_id, data_type: int64, tests: [unique, not_null]}
+      - {name: customer_sk, data_type: string, tests: [not_null, {relationships: {arguments: {to: "ref('dim_customer')", field: customer_sk}}}]}
+      - {name: customer_id, data_type: int64, tests: [not_null]}
+      - {name: date_key, data_type: int64, tests: [not_null, {relationships: {arguments: {to: "ref('dim_date')", field: date_key}}}]}
       - {name: ordered_at, data_type: timestamp, tests: [not_null]}
-      - {name: status, data_type: varchar, tests: [{accepted_values: {arguments: {values: [completed, cancelled, returned]}}}]}
-      - {name: channel, data_type: varchar}
-      - {name: promo_code, data_type: varchar}
-      - {name: item_count, data_type: integer}
-      - {name: unit_count, data_type: integer}
-      - {name: gross_amount, data_type: "decimal(12,2)"}
-      - {name: discount_amount, data_type: "decimal(12,2)"}
-      - {name: order_total, data_type: "decimal(12,2)", tests: [not_null]}
+      - {name: status, data_type: string, tests: [{accepted_values: {arguments: {values: [completed, cancelled, returned]}}}]}
+      - {name: channel, data_type: string}
+      - {name: promo_code, data_type: string}
+      - {name: item_count, data_type: int64}
+      - {name: unit_count, data_type: int64}
+      - {name: gross_amount, data_type: "numeric(12,2)"}
+      - {name: discount_amount, data_type: "numeric(12,2)"}
+      - {name: order_total, data_type: "numeric(12,2)", tests: [not_null]}
 
   - name: fact_order_items
     description: "Grain: one row per product line in an order. Incremental on ordered_at."
     config: {contract: {enforced: true}}
     columns:
-      - {name: order_item_id, data_type: bigint, tests: [unique, not_null]}
-      - {name: order_id, data_type: bigint, tests: [not_null, {relationships: {arguments: {to: "ref('fact_orders')", field: order_id}}}]}
-      - {name: line_number, data_type: integer}
-      - {name: customer_sk, data_type: varchar, tests: [not_null, {relationships: {arguments: {to: "ref('dim_customer')", field: customer_sk}}}]}
-      - {name: product_sk, data_type: varchar, tests: [not_null, {relationships: {arguments: {to: "ref('dim_product')", field: product_sk}}}]}
-      - {name: product_id, data_type: bigint}
-      - {name: date_key, data_type: integer, tests: [not_null, {relationships: {arguments: {to: "ref('dim_date')", field: date_key}}}]}
+      - {name: order_item_id, data_type: int64, tests: [unique, not_null]}
+      - {name: order_id, data_type: int64, tests: [not_null, {relationships: {arguments: {to: "ref('fact_orders')", field: order_id}}}]}
+      - {name: line_number, data_type: int64}
+      - {name: customer_sk, data_type: string, tests: [not_null, {relationships: {arguments: {to: "ref('dim_customer')", field: customer_sk}}}]}
+      - {name: product_sk, data_type: string, tests: [not_null, {relationships: {arguments: {to: "ref('dim_product')", field: product_sk}}}]}
+      - {name: product_id, data_type: int64}
+      - {name: date_key, data_type: int64, tests: [not_null, {relationships: {arguments: {to: "ref('dim_date')", field: date_key}}}]}
       - {name: ordered_at, data_type: timestamp, tests: [not_null]}
-      - {name: quantity, data_type: integer, tests: [not_null]}
-      - {name: unit_price, data_type: "decimal(10,2)"}
-      - {name: discount, data_type: "decimal(10,2)"}
-      - {name: line_total, data_type: "decimal(12,2)", tests: [not_null]}
+      - {name: quantity, data_type: int64, tests: [not_null]}
+      - {name: unit_price, data_type: "numeric(10,2)"}
+      - {name: discount, data_type: "numeric(10,2)"}
+      - {name: line_total, data_type: "numeric(12,2)", tests: [not_null]}

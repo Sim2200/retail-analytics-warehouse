@@ -3,8 +3,10 @@ DBT     := cd dbt && DBT_PROFILES_DIR=. ../.venv/bin/dbt
 FLINKPY := .venv-flink/bin/python
 COMPOSE := docker compose -f streaming/docker-compose.yml
 SCALE   ?= 1.0
+BQ_PROJECT ?= your-gcp-project-id
+DBT_BQ  := cd dbt && DBT_PROFILES_DIR=. BQ_PROJECT=$(BQ_PROJECT) ../.venv/bin/dbt
 
-.PHONY: setup data load build build-incremental docs lint test stream-up stream stream-down stream-logs all clean
+.PHONY: setup data load build build-incremental docs lint test stream-up stream stream-down stream-logs all clean bq-load bq-build
 
 setup:              ## two virtualenvs: dbt stack, and PyFlink (their dependencies conflict)
 	uv venv -q -p 3.11 .venv && uv pip install -q -p .venv/bin/python -r requirements.txt
@@ -48,6 +50,15 @@ stream-down:
 
 stream-logs:
 	$(COMPOSE) logs --tail 100 jobmanager taskmanager
+
+bq-load:            ## load the raw Parquet files into BigQuery (needs gcloud auth application-default login)
+	$(PY) scripts/load_raw_bigquery.py --project $(BQ_PROJECT)
+
+bq-build:           ## the same two-pass snapshot + dbt build, on BigQuery; writes results/bigquery_build.json
+	$(DBT_BQ) run --target bigquery --select stg_customers --vars '{include_customer_updates: false}'
+	$(DBT_BQ) snapshot --target bigquery --vars '{include_customer_updates: false}'
+	$(DBT_BQ) build --target bigquery --full-refresh
+	$(PY) scripts/bq_build_summary.py --project $(BQ_PROJECT)
 
 all: build docs     ## batch side end to end (run `make stream-up stream` for the streaming side)
 

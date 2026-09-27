@@ -2,7 +2,7 @@
     config(
         materialized='incremental',
         unique_key='order_item_id',
-        incremental_strategy='delete+insert',
+        incremental_strategy=incremental_strategy(),
         on_schema_change='fail',
     )
 }}
@@ -16,7 +16,7 @@ with items as (
     from {{ ref('stg_order_items') }} as i
     inner join {{ ref('stg_orders') }} as o on i.order_id = o.order_id
     {% if is_incremental() %}
-    where o.ordered_at > (select coalesce(max(ordered_at), '1900-01-01') from {{ this }})
+    where o.ordered_at > (select coalesce(max(ordered_at), cast('1900-01-01' as timestamp)) from {{ this }})
     {% endif %}
 ),
 
@@ -43,7 +43,7 @@ select
     c.customer_sk,
     p.product_sk,
     i.product_id,
-    cast(strftime(i.ordered_at, '%Y%m%d') as integer) as date_key,
+    {{ date_key('i.ordered_at') }} as date_key,
     i.ordered_at,
     i.quantity,
     i.unit_price,

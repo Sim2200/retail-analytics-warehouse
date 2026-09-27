@@ -12,5 +12,5 @@ select
     max(w.latency_ms) as max_latency_ms
 from {{ source('stream', 'window_metrics') }} as w
 inner join {{ ref('dim_date') }} as d
-    on cast(strftime(w.window_start, '%Y%m%d') as integer) = d.date_key
+    on {{ date_key('w.window_start') }} = d.date_key
 group by d.date_day, d.day_name

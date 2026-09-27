@@ -2,7 +2,7 @@
     config(
         materialized='incremental',
         unique_key='order_id',
-        incremental_strategy='delete+insert',
+        incremental_strategy=incremental_strategy(),
         on_schema_change='fail',
     )
 }}
@@ -12,7 +12,7 @@
 with orders as (
     select * from {{ ref('stg_orders') }}
     {% if is_incremental() %}
-    where ordered_at > (select coalesce(max(ordered_at), '1900-01-01') from {{ this }})
+    where ordered_at > (select coalesce(max(ordered_at), cast('1900-01-01' as timestamp)) from {{ this }})
     {% endif %}
 ),
 
@@ -33,13 +33,13 @@ select
     o.order_id,
     c.customer_sk,
     o.customer_id,
-    cast(strftime(o.ordered_at, '%Y%m%d') as integer) as date_key,
+    {{ date_key('o.ordered_at') }} as date_key,
     o.ordered_at,
     o.status,
     o.channel,
     o.promo_code,
-    cast(coalesce(t.item_count, 0) as integer) as item_count,
-    cast(coalesce(t.unit_count, 0) as integer) as unit_count,
+    cast(coalesce(t.item_count, 0) as int64) as item_count,
+    cast(coalesce(t.unit_count, 0) as int64) as unit_count,
     {{ money('coalesce(t.gross_amount, 0)') }} as gross_amount,
     {{ money('coalesce(t.discount_amount, 0)') }} as discount_amount,
     {{ money('coalesce(t.order_total, 0)') }} as order_total

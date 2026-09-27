@@ -15,5 +15,5 @@ select
     signup_date,
     cast(dbt_valid_from as timestamp) as valid_from,
     cast(dbt_valid_to as timestamp) as valid_to,
-    cast(dbt_valid_to is null as boolean) as is_current
+    cast(dbt_valid_to is null as bool) as is_current
 from {{ ref('customers_snapshot') }}

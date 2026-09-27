@@ -1,7 +1,8 @@
 # Two targets. `duckdb` (default) is a local file and needs nothing else.
-# `bigquery` is optional: create a free sandbox project at console.cloud.google.com,
-# run `gcloud auth application-default login`, then
-#   pip install dbt-bigquery && dbt build --target bigquery --vars '{bq_project: your-project-id}'
+# `bigquery` needs a GCP project with the BigQuery API enabled and
+# `gcloud auth application-default login`; then:
+#   make bq-load BQ_PROJECT=<project-id>   # raw Parquet -> raw dataset (load jobs)
+#   make bq-build BQ_PROJECT=<project-id>  # the same snapshot sequence + dbt build on BigQuery
 retail_warehouse:
   target: duckdb
   outputs:
@@ -13,9 +14,9 @@ retail_warehouse:
     bigquery:
       type: bigquery
       method: oauth
-      project: "{{ var('bq_project', 'your-gcp-project-id') }}"
-      dataset: retail_warehouse
+      project: "{{ env_var('BQ_PROJECT', var('bq_project', 'your-gcp-project-id')) }}"
+      dataset: retail_warehouse   # models override this with their own dataset (staging, marts, ...)
       location: US
-      threads: 4
-      # Sandbox projects cannot run DML on streaming buffers or use some DDL; the
-      # marts still build. Column-level security: see README, Governance section.
+      threads: 8
+      priority: interactive
+      job_execution_timeout_seconds: 600

@@ -1,0 +1,4 @@
+apache-beam[gcp]>=2.60,<3
+google-cloud-pubsub
+google-cloud-bigquery
+pyarrow

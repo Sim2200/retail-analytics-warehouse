@@ -1,0 +1,104 @@
+{
+  "job": {
+    "name": "order-metrics-20260927-141302",
+    "id": "2026-09-27_07_13_11-5497998008761448427",
+    "region": "us-central1",
+    "machine_type": "e2-medium",
+    "max_workers": 2,
+    "seconds_to_running": 57,
+    "seconds_to_first_window": 244,
+    "wall_seconds": 610
+  },
+  "publisher": {
+    "events_sent": 330001,
+    "seconds": 165.09,
+    "events_per_second": 1998.9,
+    "target_rate": 2000.0,
+    "started_at": "2026-09-27T14:18:11.642Z",
+    "finished_at": "2026-09-27T14:22:57.215Z"
+  },
+  "windows": 5,
+  "orders_in_windows": 220376,
+  "latency_ms": {
+    "min": 41039,
+    "median": 92023,
+    "max": 149780
+  },
+  "beam_emit_ms": {
+    "min": 40096,
+    "median": 89801,
+    "max": 147437
+  },
+  "dataflow_metrics": {
+    "TotalVcpuTime": 1021,
+    "TotalMemoryUsage": 2091294,
+    "TotalPdUsage": 15317,
+    "TotalStreamingDataProcessed": 0.11228626314550638,
+    "TotalSeCuUsage": 0.05958981856844657,
+    "CurrentVcpuCount": 2
+  },
+  "cost_estimate_usd": {
+    "vcpu_hours": 0.284,
+    "memory_gb_hours": 0.567,
+    "streaming_data_gb": 0.0,
+    "total": 0.0216,
+    "note": "Dataflow list prices for us-central1; Pub/Sub and BigQuery streaming inserts are cents at this volume"
+  },
+  "windows_detail": [
+    {
+      "window_start": "2026-09-27T14:16:00+00:00",
+      "window_end": "2026-09-27T14:17:00+00:00",
+      "orders": 78,
+      "revenue": 2610.38,
+      "avg_basket": 3.654,
+      "emitted_at": "2026-09-27T14:18:29.801888+00:00",
+      "loaded_at": "2026-09-27T14:18:32.023018+00:00",
+      "beam_ms": 89801,
+      "latency_ms": 92023
+    },
+    {
+      "window_start": "2026-09-27T14:17:00+00:00",
+      "window_end": "2026-09-27T14:18:00+00:00",
+      "orders": 77,
+      "revenue": 2629.09,
+      "avg_basket": 3.312,
+      "emitted_at": "2026-09-27T14:19:00.925518+00:00",
+      "loaded_at": "2026-09-27T14:19:05.070196+00:00",
+      "beam_ms": 60925,
+      "latency_ms": 65070
+    },
+    {
+      "window_start": "2026-09-27T14:18:00+00:00",
+      "window_end": "2026-09-27T14:19:00+00:00",
+      "orders": 64631,
+      "revenue": 2353460.4,
+      "avg_basket": 3.593,
+      "emitted_at": "2026-09-27T14:21:27.437696+00:00",
+      "loaded_at": "2026-09-27T14:21:29.780968+00:00",
+      "beam_ms": 147437,
+      "latency_ms": 149780
+    },
+    {
+      "window_start": "2026-09-27T14:19:00+00:00",
+      "window_end": "2026-09-27T14:20:00+00:00",
+      "orders": 80182,
+      "revenue": 2929117.32,
+      "avg_basket": 3.603,
+      "emitted_at": "2026-09-27T14:21:35.623387+00:00",
+      "loaded_at": "2026-09-27T14:21:38.267982+00:00",
+      "beam_ms": 95623,
+      "latency_ms": 98267
+    },
+    {
+      "window_start": "2026-09-27T14:20:00+00:00",
+      "window_end": "2026-09-27T14:21:00+00:00",
+      "orders": 75408,
+      "revenue": 2748511.46,
+      "avg_basket": 3.601,
+      "emitted_at": "2026-09-27T14:21:40.096593+00:00",
+      "loaded_at": "2026-09-27T14:21:41.039109+00:00",
+      "beam_ms": 40096,
+      "latency_ms": 41039
+    }
+  ]
+}

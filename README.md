@@ -51,7 +51,13 @@ flowchart LR
         FL -->|order_metrics topic| K
         K -->|loader.py| SW[(stream schema)]
     end
+    subgraph CLOUD[Streaming · Google Cloud]
+        PUB[publish.py] -->|orders topic| PS[(Pub/Sub)]
+        PS --> DF[Dataflow · Beam job<br/>same 1-min windows]
+        DF -->|streaming inserts| BQ[(BigQuery<br/>stream dataset)]
+    end
     MARTS -.->|replay set| PROD
+    MARTS -.->|replay set| PUB
     SW --> MARTS
 
     MARTS --> DQ[(governance schema<br/>dq_summary · pii_inventory)]
@@ -261,6 +267,10 @@ make lint            # sqlfluff
 make stream-up       # Kafka + Flink (Docker)
 make stream          # replay, window, load, measure -> results/streaming_run.json
 make stream-down
+make setup-beam      # third venv (apache-beam[gcp])
+make cloud-stream-up BQ_PROJECT=<gcp-project>    # Pub/Sub topic + subscription, Dataflow bucket (one-off)
+make cloud-stream BQ_PROJECT=<gcp-project>       # Pub/Sub -> Dataflow -> BigQuery run -> results/dataflow_run.json
+make cloud-stream-down BQ_PROJECT=<gcp-project>  # cancel jobs, delete topic/subscription/bucket
 make all             # build + docs
 ```
 
@@ -278,7 +288,8 @@ scripts/load_raw_bigquery.py, bq_build_summary.py, bq_authorized_view.py   the B
 dbt/                        models/{staging,intermediate,marts,governance,streaming}, snapshots/, macros/, tests/
 streaming/                  docker-compose.yml, flink.Dockerfile, jobs/order_metrics.py,
                             producer.py, loader.py, export_replay.py, run_experiment.py
-results/                    last_build.json, streaming_run.json (the numbers in this README)
+streaming/cloud/            order_metrics_beam.py (Dataflow), publish.py (Pub/Sub), run_experiment.py
+results/                    last_build.json, streaming_run_*.json, bigquery_build.json, dataflow_run.json
 ```
 
 ## Author

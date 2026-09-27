@@ -1,4 +1,5 @@
 PY      := .venv/bin/python
+BEAMPY  := .venv-beam/bin/python
 DBT     := cd dbt && DBT_PROFILES_DIR=. ../.venv/bin/dbt
 FLINKPY := .venv-flink/bin/python
 COMPOSE := docker compose -f streaming/docker-compose.yml
@@ -6,11 +7,14 @@ SCALE   ?= 1.0
 BQ_PROJECT ?= your-gcp-project-id
 DBT_BQ  := cd dbt && DBT_PROFILES_DIR=. BQ_PROJECT=$(BQ_PROJECT) ../.venv/bin/dbt
 
-.PHONY: setup data load build build-incremental docs lint test stream-up stream stream-down stream-logs all clean bq-load bq-build
+.PHONY: setup data load build build-incremental docs lint test stream-up stream stream-down stream-logs all clean bq-load bq-build cloud-stream-up cloud-stream cloud-stream-down
 
 setup:              ## two virtualenvs: dbt stack, and PyFlink (their dependencies conflict)
 	uv venv -q -p 3.11 .venv && uv pip install -q -p .venv/bin/python -r requirements.txt
 	uv venv -q -p 3.11 .venv-flink && uv pip install -q -p .venv-flink/bin/python -r requirements-flink.txt
+
+setup-beam:         ## third venv for the Dataflow experiment (apache-beam[gcp])
+	uv venv -q -p 3.11 .venv-beam && uv pip install -q -p .venv-beam/bin/python -r requirements-beam.txt
 
 data:               ## generate the synthetic dataset (SCALE=0.05 for a CI-sized sample)
 	$(PY) data_gen/generate.py --scale $(SCALE)
@@ -60,6 +64,22 @@ bq-build:           ## the same two-pass snapshot + dbt build, on BigQuery; writ
 	$(DBT_BQ) build --target bigquery --full-refresh
 	$(PY) scripts/bq_build_summary.py --project $(BQ_PROJECT)
 	$(PY) scripts/bq_authorized_view.py --project $(BQ_PROJECT)
+
+cloud-stream-up:    ## Pub/Sub topic + subscription, Dataflow staging bucket, worker IAM (one-off)
+	gcloud services enable dataflow.googleapis.com pubsub.googleapis.com --project $(BQ_PROJECT)
+	gcloud storage buckets create gs://$(BQ_PROJECT)-dataflow --location us-central1 --project $(BQ_PROJECT) || true
+	gcloud pubsub topics create orders --project $(BQ_PROJECT) || true
+	gcloud pubsub subscriptions create orders-beam --topic orders --project $(BQ_PROJECT) --ack-deadline 60 || true
+
+cloud-stream:       ## Pub/Sub -> Dataflow (Beam) -> BigQuery: replay, window, measure -> results/dataflow_run.json
+	$(BEAMPY) streaming/cloud/run_experiment.py --project $(BQ_PROJECT) --rate 2000 --seconds 165
+
+cloud-stream-down:  ## cancel any running job and delete the topic, subscription and bucket
+	-gcloud dataflow jobs list --project $(BQ_PROJECT) --region us-central1 --status=active --format='value(id)' \
+	  | xargs -n1 -I{} gcloud dataflow jobs cancel {} --project $(BQ_PROJECT) --region us-central1
+	-gcloud pubsub subscriptions delete orders-beam --project $(BQ_PROJECT) --quiet
+	-gcloud pubsub topics delete orders --project $(BQ_PROJECT) --quiet
+	-gcloud storage rm -r gs://$(BQ_PROJECT)-dataflow --quiet
 
 all: build docs     ## batch side end to end (run `make stream-up stream` for the streaming side)
 

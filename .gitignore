@@ -11,3 +11,5 @@ dbt/logs/
 logs/
 .DS_Store
 data/replay_orders.parquet
+.venv-beam/
+results/*.txt

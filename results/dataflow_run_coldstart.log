@@ -1,0 +1,36 @@
+1. drain subscription
+subscriptionId: projects/project-1adf2361-a5bc-4d4a-a7f/subscriptions/orders-beam
+time: '2026-09-27T13:57:04.000000Z'
+2. launch Dataflow job order-metrics-20260927-135704
+/Users/simran/Jobs/projects/retail-analytics-warehouse/.venv-beam/bin/python: No module named pip
+   Pending
+   Running
+   running after 26 s; giving workers 60 s to start reading
+3. publish + 4. poll BigQuery
+  50,000 events, 1,983/s
+  100,000 events, 1,991/s
+  150,000 events, 1,994/s
+  200,000 events, 1,995/s
+  250,000 events, 1,997/s
+  300,000 events, 1,997/s
+   window 13:58 orders=30,607 revenue=1,111,894.21 beam=153588 ms  end-to-end=156344 ms
+   window 13:59 orders=80,527 revenue=2,944,332.77 beam=93588 ms  end-to-end=96344 ms
+   window 14:00 orders=79,741 revenue=2,905,423.20 beam=71013 ms  end-to-end=74098 ms
+   window 14:01 orders=29,338 revenue=1,069,152.98 beam=29092 ms  end-to-end=31914 ms
+{"events_sent": 330001, "seconds": 165.17, "events_per_second": 1997.9, "target_rate": 2000.0, "started_at": "2026-09-27T13:58:37.040Z", "finished_at": "2026-09-27T14:03:22.910Z"}
+5. cancel job, collect metrics
+Traceback (most recent call last):
+  File "/Users/simran/Jobs/projects/retail-analytics-warehouse/streaming/cloud/run_experiment.py", line 164, in <module>
+    main()
+  File "/Users/simran/Jobs/projects/retail-analytics-warehouse/streaming/cloud/run_experiment.py", line 125, in main
+    metrics = json.loads(gcloud("dataflow", "metrics", "list", job_id, "--project", P, "--region", REGION))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/simran/Jobs/projects/retail-analytics-warehouse/streaming/cloud/run_experiment.py", line 45, in gcloud
+    return sh("gcloud", *args, "--format=json", capture=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/simran/Jobs/projects/retail-analytics-warehouse/streaming/cloud/run_experiment.py", line 40, in sh
+    r = subprocess.run(args, text=True, capture_output=capture, check=check)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/simran/.local/share/uv/python/cpython-3.11.16-macos-x86_64-none/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '('gcloud', 'dataflow', 'metrics', 'list', '2026-09-27_06_57_14-2155150100444719636', '--project', 'project-1adf2361-a5bc-4d4a-a7f', '--region', 'us-central1', '--format=json')' returned non-zero exit status 2.

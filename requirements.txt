@@ -5,8 +5,8 @@ pyarrow
 pandas
 numpy
 faker
-sqlfluff
-sqlfluff-templater-dbt
+sqlfluff==4.3.0
+sqlfluff-templater-dbt==4.3.0
 kafka-python-ng
 networkx
 matplotlib

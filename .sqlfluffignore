@@ -1,0 +1,2 @@
+# Generated SQL (a Jinja loop emits the UNION ALL); the layout rules cannot follow it.
+dbt/models/governance/pii_inventory.sql
